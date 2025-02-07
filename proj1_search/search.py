@@ -90,17 +90,68 @@ def depthFirstSearch(problem: SearchProblem) -> List[Directions]:
     print("Start's successors:", problem.getSuccessors(problem.getStartState()))
     """
     "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    stack = util.Stack()
+    closed_set = set()
+    start_state = problem.getStartState()
+    stack.push((start_state, []))
+    
+    while not stack.isEmpty():
+        current_state, paths = stack.pop()
+        # If current state is the goal, return
+        if problem.isGoalState(current_state):
+            return paths
+        # If current state is not in closed set, further search
+        if current_state in closed_set: continue
+        else:
+            closed_set.add(current_state)
+            for successor, step, _ in problem.getSuccessors(current_state):
+                if successor not in closed_set:
+                    stack.push((successor, paths + [step]))
+    
 
 def breadthFirstSearch(problem: SearchProblem) -> List[Directions]:
     """Search the shallowest nodes in the search tree first."""
     "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    queue = util.Queue()
+    closed_set = set()
+    start_state = problem.getStartState()
+    queue.push((start_state, []))
+    
+    while not queue.isEmpty():
+        current_state, paths = queue.pop()
+        # If current state is the goal, return
+        if problem.isGoalState(current_state):
+            return paths
+        # If current state is not in closed set, further search
+        if current_state in closed_set: continue
+        else:
+            closed_set.add(current_state)
+            for successor, step, _ in problem.getSuccessors(current_state):
+                if successor not in closed_set:
+                    queue.push((successor, paths + [step]))
+
 
 def uniformCostSearch(problem: SearchProblem) -> List[Directions]:
     """Search the node of least total cost first."""
     "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    queue = util.PriorityQueue()
+    closed_set = set()
+    start_state = problem.getStartState()
+    queue.push((start_state, []), 0)
+    
+    while not queue.isEmpty():
+        current_state, paths = queue.pop()
+        # If current state is the goal, return
+        if problem.isGoalState(current_state):
+            return paths
+        # If current state is not in closed set, further search
+        if current_state in closed_set: continue
+        else:
+            closed_set.add(current_state)
+            for successor, step, _ in problem.getSuccessors(current_state):
+                if successor not in closed_set:
+                    queue.push((successor, paths + [step]), problem.getCostOfActions(paths + [step]))
+
 
 def nullHeuristic(state, problem=None) -> float:
     """
@@ -112,7 +163,26 @@ def nullHeuristic(state, problem=None) -> float:
 def aStarSearch(problem: SearchProblem, heuristic=nullHeuristic) -> List[Directions]:
     """Search the node that has the lowest combined cost and heuristic first."""
     "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    queue = util.PriorityQueue()
+    start_state = problem.getStartState()
+    closed_set = {start_state: 0}
+    queue.push((start_state, []), heuristic(start_state, problem))
+    
+    while not queue.isEmpty():
+        current_state, paths = queue.pop()
+
+        # If current state is the goal, return
+        if problem.isGoalState(current_state):
+            return paths
+        
+        current_cost = problem.getCostOfActions(paths)
+        for successor, step, stepcost in problem.getSuccessors(current_state):
+            successor_cost = current_cost + stepcost
+            if (successor not in closed_set) or (successor_cost < closed_set[successor]):
+                closed_set[successor] = successor_cost
+                fn = successor_cost + heuristic(successor, problem)
+                queue.update((successor, paths + [step]), fn)
+                  
 
 # Abbreviations
 bfs = breadthFirstSearch
